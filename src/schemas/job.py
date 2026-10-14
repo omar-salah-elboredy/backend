@@ -6,7 +6,7 @@ class StoryJobBase(BaseModel):
     theme: str  # Theme of the story job
 
 class StoryJobResponse(StoryJobBase):
-    job_id: str  # Unique identifier for the job
+    job_id: str | None = None  # Unique identifier for the job
     status: str  # Status of the job (e.g., pending, completed, failed)
     created_at: datetime  # Timestamp when the job was created
     story_id: Optional[int] = None  # ID of the associated story

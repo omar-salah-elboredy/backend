@@ -12,14 +12,13 @@ from src.db.database import Base
 class StoryJob(Base):
     __tablename__ = "story_jobs"
     
-    id = Column(Integer, primary_key=True, index=True)
-    job_id = Column(String, unique=True, index=True)
-    story_id = Column(Integer, ForeignKey("stories.id"), nullable=True)  # Link to the story that this job is creating
-    status = Column(String)  # INPROGRESS, COMPLETED, FAILED
+    id = Column(String, primary_key=True, index=True)
     theme = Column(String)  # Theme of the story
+    status = Column(String)  # INPROGRESS, COMPLETED, FAILED
     session_id = Column(String)  # Session ID for the story
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    error_message = Column(String, nullable=True)  # Error message if the job failed
-    completed_at = Column(DateTime(timezone=True), nullable=True)  # Timestamp when the job was completed
     
     story = relationship("Story", back_populates="jobs")
+    story_id = Column(Integer, ForeignKey("stories.id"), nullable=True)  # Link to the story that this job is creating
+    error_message = Column(String, nullable=True)  # Error message if the job failed
+    completed_at = Column(DateTime(timezone=True), nullable=True)  # Timestamp when the job was completed

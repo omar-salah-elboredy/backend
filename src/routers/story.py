@@ -40,7 +40,7 @@ def create_story(request: CreateStoryRequest,
         id=job_id,
         theme=request.theme,
         status="pending",
-        created_at=datetime.utcnow(),
+        created_at=datetime.now(timezone.utc),
         session_id=session_id
     )
     db.add(job)
@@ -64,16 +64,16 @@ def generate_story_task(job_id: str, theme: str, session_id: str):
             job.status = "processing"
             db.commit()
 
-            story = {} # TODO: Implement the story generation logic here based on the theme. For now, we will just create a dummy story.
+            # story = {id: f"{time.time()}"} # TODO: Implement the story generation logic here based on the theme. For now, we will just create a dummy story.
 
             job.story_id = story.id
             job.status = "completed"
-            job.completed_at = datetime.utcnow(timezone.utc)
+            job.completed_at = datetime.now(timezone.utc)
             db.commit()
         except Exception as e:
             print(f"Error occurred while generating story: {e}")
             job.status = "failed"
-            job.completed_at = datetime.utcnow(timezone.utc)
+            job.completed_at = datetime.now(timezone.utc)
             job.error_message = str(e)
             db.commit()
     except Exception as e:
@@ -88,7 +88,7 @@ def get_complete_story(story_id: int, db: Session = Depends(get_db)):
     if not story:
         raise HTTPException(status_code=404, detail="Story not found")
     
-    nodes = db.query(StoryNode).filter(StoryNode.story_id == story.id).all()
+    # nodes = db.query(StoryNode).filter(StoryNode.story_id == story.id).all()
     
     # TODO: Parse the story and nodes into the CompleteStoryResponse schema and return it. For now, we will just return a dummy response.
 
