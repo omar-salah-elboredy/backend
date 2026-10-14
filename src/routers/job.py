@@ -2,7 +2,7 @@ import uuid
 from typing import Optional
 from fastapi import APIRouter, Depends, BackgroundTasks, Response, HTTPException, Cookie
 from sqlalchemy.orm import Session
-from src.database import get_db
+from src.db.database import get_db
 from src.models.job import StoryJob
 from src.schemas.job import StoryJobResponse
 

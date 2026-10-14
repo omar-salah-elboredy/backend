@@ -4,17 +4,17 @@
 ## Backend will also handle the logic for determining if a node is a winning ending or not, and will update the story accordingly. The frontend will then display the story to the user, and allow them to make choices that will lead to different endings.
 
 
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-
+from src.db.database import Base
 
 class StoryJob(Base):
     __tablename__ = "story_jobs"
     
     id = Column(Integer, primary_key=True, index=True)
     job_id = Column(String, unique=True, index=True)
-    story_id = Column(Integer, nullable=True)
+    story_id = Column(Integer, ForeignKey("stories.id"), nullable=True)  # Link to the story that this job is creating
     status = Column(String)  # INPROGRESS, COMPLETED, FAILED
     theme = Column(String)  # Theme of the story
     session_id = Column(String)  # Session ID for the story

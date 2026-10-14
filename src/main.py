@@ -2,7 +2,11 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import settings
 
-from routers import story, job
+from src.routers import story, job
+from db.database import create_tables
+
+
+create_tables()  # Ensure that the database tables are created before the application starts.
 
 app = FastAPI(
     title="My FastAPI Application",
@@ -21,8 +25,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-app.include_router(story.router, prefix=settings.STORY_PREFIX, tags=["stories"])
-app.include_router(job.router, prefix=settings.JOB_PREFIX, tags=["jobs"])
+app.include_router(story.router, prefix=settings.API_PREFIX, tags=["stories"])
 
 if __name__ == "__main__":
     import uvicorn

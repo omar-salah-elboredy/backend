@@ -1,14 +1,16 @@
 # We write a router for the story endpoints. This router will handle all the requests related to stories, such as creating, reading, updating, and deleting stories.
 
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException, Cookie, Response, BackgroundTasks
 from sqlalchemy.orm import Session
-from src.database import get_db, SessionLocal
-from src.models.story import Story, StoryNode
+from src.db.database import get_db, SessionLocal
+
 from src.models.job import StoryJob
-from src.schemas.story import StoryCreate, StoryResponse, StoryNodeCreate, StoryNodeResponse
 from src.schemas.job import StoryJobResponse
+
+from src.models.story import Story, StoryNode
+from src.schemas.story import CompleteStoryResponse, CreateStoryRequest
 
 router = APIRouter(
     prefix="/stories", # All endpoints in this router will be prefixed with /stories.
@@ -24,17 +26,17 @@ def get_current_session_id(session_id: str = Cookie(None)):
 
 @router.post("/create", response_model=StoryJobResponse)
 def create_story(request: CreateStoryRequest, 
-                    background_tasks: BackgroundTasks, 
+                    background_tasks: BackgroundTasks,
+                    response: Response, 
                     db: Session = Depends(get_db), 
-                    session_id: str = Depends(get_current_session_id)
-                    response: Response):
+                    session_id: str = Depends(get_current_session_id),
+                ):
     
     response.set_cookie(key="session_id", value=session_id, httponly=True)
     # Create a new story job in the database with status "pending"
     job_id = str(uuid.uuid4())
     
-    job = 
-StoryJob(
+    job = StoryJob(
         id=job_id,
         theme=request.theme,
         status="pending",
@@ -66,12 +68,12 @@ def generate_story_task(job_id: str, theme: str, session_id: str):
 
             job.story_id = story.id
             job.status = "completed"
-            job.completed_at = datetime.now()
+            job.completed_at = datetime.utcnow(timezone.utc)
             db.commit()
         except Exception as e:
             print(f"Error occurred while generating story: {e}")
             job.status = "failed"
-            job.completed_at = datetime.now()
+            job.completed_at = datetime.utcnow(timezone.utc)
             job.error_message = str(e)
             db.commit()
     except Exception as e:
@@ -79,7 +81,7 @@ def generate_story_task(job_id: str, theme: str, session_id: str):
     finally:
         db.close()
 
-@router.get("/story/{job_id}/complete", response_model=CompleteStoryResponse)
+@router.get("/story/{story_id}/complete", response_model=CompleteStoryResponse)
 def get_complete_story(story_id: int, db: Session = Depends(get_db)):
     # Fetch the story and its nodes from the database
     story = db.query(Story).filter(Story.id == story_id).first()
