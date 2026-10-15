@@ -4,6 +4,10 @@ from src.core.config import settings
 
 from src.routers import story, job
 from src.db.database import create_tables
+from dotenv import load_dotenv
+
+# This reads your .env file and makes it available to OpenAI
+load_dotenv()
 
 create_tables()  # Ensure that the database tables are created before the application starts.
 
@@ -25,6 +29,7 @@ app.add_middleware(
 )
 
 app.include_router(story.router, prefix=settings.API_PREFIX, tags=["stories"])
+app.include_router(job.router, prefix=settings.API_PREFIX, tags=["jobs"])
 
 if __name__ == "__main__":
     import uvicorn

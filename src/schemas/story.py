@@ -9,8 +9,8 @@ from pydantic import BaseModel
 # BaseModel is a base class for creating data models that can be used to validate and serialize data.
 
 class StoryOptionsSchema(BaseModel):
-    option_text: str
-    next_node_id: Optional[int] = None  # ID of the next node if this option is chosen
+    text: str
+    node_id: Optional[int] = None  # ID of the next node if this option is chosen
 
 class StoryNodeBase(BaseModel):
     content: str
@@ -28,7 +28,7 @@ class CompleteStoryNodeResponse(StoryNodeBase):
 
 
 class StoryBase(BaseModel):
-    story_name: str
+    story_name: Optional[str] = None
     title: str
     session_id: Optional[str] = None  # Session ID for the story, can be None if not provided
 
