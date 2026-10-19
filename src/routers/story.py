@@ -13,6 +13,8 @@ from src.schemas.job import StoryJobResponse
 from src.models.story import Story, StoryNode
 from src.schemas.story import CompleteStoryNodeResponse, CompleteStoryResponse, CreateStoryRequest
 
+from src.core.solr_client import search_stories
+
 router = APIRouter(
     prefix="/stories", # All endpoints in this router will be prefixed with /stories.
     tags=["stories"]
@@ -116,3 +118,31 @@ def build_complete_story_tree(db: Session, story: Story) -> CompleteStoryRespons
         root_node=node_dict[root_node.id],
         all_nodes=node_dict
     )
+
+@router.get("/search", responses={400: {"description": "Search query cannot be empty."},
+                                  500: {"description":"Search cluster temporarily unavailable"}})
+def search_all_stories(q: str, db: Session = Depends(get_db)):
+    if not q or not q.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty.")
+    try:
+        search_res = search_stories(q)
+        formatted_matches = []
+
+        for doc in search_res:
+            formatted_matches.append({
+                "node_id": doc.get("id", "").replace("node_", ""), # Cleans 'node_12' down to '12'
+                "story_id": doc.get("story_id_i"),
+                "snippet": doc.get("content_t"),
+                "indexed_at": doc.get("timestamp_dt")
+            })
+            
+        return {
+            "query": q,
+            "total_matches": len(formatted_matches),
+            "results": formatted_matches
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, 
+            detail=f"Search cluster temporarily unavailable: {str(e)}"
+        )
