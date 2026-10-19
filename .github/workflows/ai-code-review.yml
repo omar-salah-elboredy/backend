@@ -3,6 +3,7 @@ name: AI Code Review
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
+  workflow_dispatch:
 
 permissions:
   contents: read
