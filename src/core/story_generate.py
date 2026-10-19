@@ -9,6 +9,8 @@ from src.core.prompts import STORY_PROMPT
 from src.core.models import StoryNodeLLM, StoryLLMResponse
 from src.models.story import Story, StoryNode
 
+from src.core.solr_client import index_story_node
+
 class StoryGenerator:
 
     @classmethod
@@ -81,4 +83,15 @@ class StoryGenerator:
             node.options = options_list
 
         db.flush()
+
+
+        try:
+            index_story_node(
+                story_id=story_id,
+                node_id=node.id,  # Flushed SQLite ID is ready
+                prompt=f"Branch node element of story {story_id}",  # Fallback helper string
+                content=node_data.content
+            )
+        except Exception as e:
+            print(f"Solr indexing skipped for node {node.id}: {e}")
         return node

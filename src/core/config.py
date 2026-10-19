@@ -28,6 +28,7 @@ class Settings(BaseSettings):
             return [origin.strip() for origin in v.split(",")]
         if isinstance(v, list):
             return [str(origin).strip() for origin in v]
+        print(f"Allowed origins = {v}")
         return v or []
 
     model_config = SettingsConfigDict(
